@@ -7,7 +7,7 @@ app = Flask(__name__)
 def hello():
     return "Hello World yo yo!"
 
-@app.route("/1")
+@app.route("/pork")
 def pork():
 	return "Human hair is underrepresented in government."
 
