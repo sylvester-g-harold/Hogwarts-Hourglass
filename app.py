@@ -90,7 +90,110 @@ def dump():
 	result_set = cursor.fetchall()
 	msg = '--- FETCH FROM DB ---\n' + str(result_set)
 	app.logger.info(msg)
-	return str(result_set)
+
+	# Format the result set into a nice little table
+	# house names are columns
+
+	# for row in result_set:
+	# 	house = row[1].lower()
+	# 	col = 0
+	# 	if house == 'gryffindor':
+	# 		col = 0
+	# 	elif house == 'hufflepuff':
+	# 		col = 1
+	# 	elif house == 'ravenclaw':
+	# 		col = 2
+	# 	elif house == 'slytherin':
+	# 		col = 3
+
+	# 	points = row[2]
+	# 	professor_name = row[3]
+
+	# TODO: factor out in helper function... #get_totals()
+	totals = {
+		'gryffindor': 0, #gryffindor
+		'hufflepuff': 0,
+		'ravenclaw': 0,
+		'slytherin': 0
+	}
+	for row in result_set:
+		house = row[1].lower()
+		points = int(row[2])
+		if totals.get('gryffindor') is not None:
+			totals[house] += points
+		else:
+			app.logger.warning('Could not find house name: {}'.format(house))
+
+	totals_html = (
+			'<style>'
+			'table {{ border-collapse:collapse; }}'
+			'th, td {{ border: 1px solid black; padding: 5px; text-align: center }}'
+			'</style>'
+
+			'<table>'
+			'<tr><th colspan="4"><h1>TOTALS</h1></th></tr>'
+			'<tr>'
+			'<th>Gryffindor</th>'
+			'<th>Hufflepuff</th>'
+			'<th>Ravenclaw</th>'
+			'<th>Slytherin</th>'
+			'</tr>'
+			'<tr>'
+			'<td>{}</td>'
+			'<td>{}</td>'
+			'<td>{}</td>'
+			'<td>{}</td>'
+			'</tr>'
+			'</table>'
+			'<br>'
+			'<br>'
+			'<br>'
+	).format(
+		totals['gryffindor'],
+		totals['hufflepuff'],
+		totals['ravenclaw'],
+		totals['slytherin'])
+
+	#TODO factor out to helper function #get_details_html()
+	details_headers = (
+		'<tr>'
+		'<th>House</th>'
+		'<th>Points</th>'
+		'<th>Professor</th>'
+		'<th>Message</th>'
+		'<tr>'
+	)
+
+	details_body = ''
+	for row in result_set:
+		house = row[1]
+		points = row[2]
+		professor_name = row[3]
+		message = row[4]
+
+		details_body += (
+			'<tr>'
+			'<td>{}</td>'
+			'<td>{}</td>'
+			'<td>{}</td>'
+			'<td>{}</td>'
+			'<tr>'
+		).format(
+			house,
+			points,
+			professor_name,
+			message
+		)
+
+	details_html = (
+		'<table>'
+		'<tr><th colspan="4"><h1>Detailed Points Log</h1></th></tr>'
+		'{}'
+		'{}'
+		'</table>'
+	).format(details_headers, details_body)
+
+	return totals_html + details_html
 
 @app.route('/sms', methods=['POST'])
 def sms(): 
