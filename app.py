@@ -5,15 +5,29 @@ import logging
 import os
 import sms_parser
 import psycopg2
+import urlparse
 
+urlparse.uses_netloc.append('postgres')
 app = Flask(__name__)
 
 def connect_db():
-	db_conn = psycopg2.connect(
-		database=os.environ.get('db_name', 'hoggyhoggywartswarts'),
-		user='isy',
-		password='')
-	return db_conn
+	conn = None
+	if os.environ.get('DATABASE_URL'):
+		url = urlparse.urlparse(os.environ['DATABASE_URL'])
+
+		conn = psycopg2.connect(
+		    database=url.path[1:],
+		    user=url.username,
+		    password=url.password,
+		    host=url.hostname,
+		    port=url.port
+		)
+	else:
+		conn = psycopg2.connect(
+			database='hoggyhoggywartswarts',
+			user='isy',
+			password='')
+	return conn
 
 def get_db():
     """Opens a new database connection if there is none yet for the
