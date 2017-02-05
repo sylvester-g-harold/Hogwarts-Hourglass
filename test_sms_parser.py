@@ -58,6 +58,11 @@ class SmsParserTestCase(unittest.TestCase):
         output = sms_parser.get_house(input)
         self.assertEqual(output, 'slytherin')
 
+    def test_get_house_with_mixed_case(self):
+        input = '5 points for Hufflepuff!'
+        output = sms_parser.get_house(input)
+        self.assertEqual(output, 'hufflepuff')
+
     def test_get_house_with_leading_padding(self):
         input = '    5 points for slytherin!'
         output = sms_parser.get_house(input)

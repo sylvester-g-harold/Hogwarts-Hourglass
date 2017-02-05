@@ -3,7 +3,6 @@ import re
 def parse_point_value_change(str):
 	house = get_house(str)
 	points = get_points(str)
-
 	result = {
 		'house': house,
 		'points': points
@@ -26,6 +25,8 @@ def get_points(str):
 		return None
 
 def get_house(str):
+	str = str.lower()
+
 	if 'gryffindor' in str:
 		return 'gryffindor'
 	if 'hufflepuff' in str:
