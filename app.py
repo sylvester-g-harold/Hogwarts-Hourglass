@@ -196,7 +196,7 @@ def dump():
 	return totals_html + details_html
 
 @app.route('/sms', methods=['POST'])
-def sms(): 
+def handle_sms(): 
 	"""
 	Sample payload from Twilio:
 	[('ToCountry', u'US'),
@@ -228,13 +228,25 @@ def sms():
 	point_value_change = sms_parser.parse_point_value_change(body)
 
 
+	custom_reply = ''
 	if is_valid_point_value_change(point_value_change):
-		app.logger.info('Storing: {}'.format(point_value_change))
+		points = point_value_change['points']
+		house = point_value_change['house']
+		custom_reply = 'Message managed! {} points for {}!'.format(points, house)
+		app.logger.info(custom_reply)
 		store_point_value_change(body, professor_name, point_value_change)
 	else:
-		app.logger.warning('Unable to parse {}'.format(body))
+		custom_reply = 'Unable to parse {}'.format(body)
+		app.logger.warning(custom_reply)
 
-	return 'ok'
+	twiml_response = (
+		'<?xml version="1.0" encoding="UTF-8"?>'
+		'<Response>'
+		'<Message>{}</Message>'
+		'</Response>'
+	).format(custom_reply)
+
+	return twiml_response
 
 
 if __name__ == '__main__':
