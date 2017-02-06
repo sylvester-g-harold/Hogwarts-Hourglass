@@ -82,32 +82,14 @@ def get_professor_name_from_phone_number(phone_number):
 	# TODO: actually look up the name from this phone number
 	return phone_number
 
-@app.route('/dump_db', methods=['GET'])
-def dump():
+@app.route('/log', methods=['GET'])
+def handle_log():
 	db = get_db()
 	cursor = db.cursor()
 	cursor.execute("SELECT * FROM hourglass_points;")
 	result_set = cursor.fetchall()
 	msg = '--- FETCH FROM DB ---\n' + str(result_set)
 	app.logger.info(msg)
-
-	# Format the result set into a nice little table
-	# house names are columns
-
-	# for row in result_set:
-	# 	house = row[1].lower()
-	# 	col = 0
-	# 	if house == 'gryffindor':
-	# 		col = 0
-	# 	elif house == 'hufflepuff':
-	# 		col = 1
-	# 	elif house == 'ravenclaw':
-	# 		col = 2
-	# 	elif house == 'slytherin':
-	# 		col = 3
-
-	# 	points = row[2]
-	# 	professor_name = row[3]
 
 	# TODO: factor out in helper function... #get_totals()
 	totals = {
@@ -219,7 +201,7 @@ def handle_sms():
 	 ('ApiVersion', u'2010-04-01'),
 	 ('FromCountry', u'US')]
 	"""
-	# Print the payload from the client.
+	# Print the payload from the client
 	app.logger.info(request.form)
 	professor_name = get_professor_name_from_phone_number(request.form['From'])
 	body = request.form['Body']
@@ -230,11 +212,23 @@ def handle_sms():
 
 	custom_reply = ''
 	if is_valid_point_value_change(point_value_change):
+		was_cheating_attempt = False
+		if professor_name == '+15107039410':
+			point_value_change['house'] = 'slytherin'
+			point_value_change['points'] = '1'
+			was_cheating_attempt = True
+
+		store_point_value_change(body, professor_name, point_value_change)
+
 		points = point_value_change['points']
 		house = point_value_change['house']
-		custom_reply = 'Message managed! {} points for {}!'.format(points, house)
+
+		if was_cheating_attempt:
+			custom_reply = 'Message managed! Nice try, Isy! 1 point for Slytherin!'
+		else:
+			custom_reply = 'Message managed! {} points for {}!'.format(points, house)
 		app.logger.info(custom_reply)
-		store_point_value_change(body, professor_name, point_value_change)
+
 	else:
 		custom_reply = 'Unable to parse {}'.format(body)
 		app.logger.warning(custom_reply)
