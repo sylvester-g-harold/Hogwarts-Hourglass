@@ -48,7 +48,7 @@ def pork():
 def is_valid_point_value_change(point_value_change):
 	return point_value_change['house'] and point_value_change['points']
 
-def store_point_value_change(message, professor_name, point_value_change):
+def store_point_value_change(point_value_change):
 	"""
 	Sample working SQL insert statement
 	insert into hourglass_points 
@@ -63,6 +63,8 @@ def store_point_value_change(message, professor_name, point_value_change):
 	"""
 	house = point_value_change['house']
 	points = point_value_change['points']
+	message = point_value_change['message']
+	professor_name = point_value_change['professor_name']
 
 	db = get_db()
 	cursor = db.cursor()
@@ -81,6 +83,49 @@ def store_point_value_change(message, professor_name, point_value_change):
 def get_professor_name_from_phone_number(phone_number):
 	# TODO: actually look up the name from this phone number
 	return phone_number
+
+def handle_possible_cheat_attempt(point_value_change):
+	custom_reply = ''
+	if point_value_change['professor_name'] == '+15107039410':
+		point_value_change['house'] = 'slytherin'
+		point_value_change['points'] = 1
+		point_value_change['message'] += ' [CHEATING ATTEMPT!]'
+		custom_reply = 'Message managed! Nice try, Isy! 1 point for Slytherin!'
+	return custom_reply
+
+@app.route('/sms', methods=['POST'])
+def handle_sms(): 
+	# Print the payload from the client
+	app.logger.info(request.form)
+
+	professor_name = get_professor_name_from_phone_number(request.form['From'])
+	body = request.form['Body']
+	house, points = sms_parser.parse_point_value_change(body)
+
+	point_value_change = {
+		'house': house,
+		'points': points,
+		'message': body,
+		'professor_name': professor_name
+	}
+
+	reply = ''
+	if is_valid_point_value_change(point_value_change):
+		reply = handle_possible_cheat_attempt(point_value_change) or\
+			'Message managed! {} points for {}!'.format(points, house)
+		store_point_value_change(point_value_change)
+	else:
+		reply = 'Unable to parse {}'.format(body)
+		app.logger.warning(custom_reply)
+
+	twiml_response = (
+		'<?xml version="1.0" encoding="UTF-8"?>'
+		'<Response>'
+		'<Message>{}</Message>'
+		'</Response>'
+	).format(reply)
+
+	return twiml_response
 
 @app.route('/log', methods=['GET'])
 def handle_log():
@@ -177,73 +222,8 @@ def handle_log():
 
 	return totals_html + details_html
 
-@app.route('/sms', methods=['POST'])
-def handle_sms(): 
-	"""
-	Sample payload from Twilio:
-	[('ToCountry', u'US'),
-	 ('From', u'+16506309505'),
-	 ('SmsStatus', u'received'),
-	 ('NumMedia', u'0'),
-	 ('ToState', u'CA'),
-	 ('FromCity', u'PALO ALTO'),
-	 ('SmsMessageSid', u'SM7d046bca6423d27801e50f1a323152a6'),
-	 ('ToCity', u'SAN FRANCISCO'),
-	 ('NumSegments', u'1'),
-	 ('FromZip', u'94304'),
-	 ('To', u'+15107571733'),
-	 ('AccountSid', u'ACfc502b87d78195dde44c7d952f835c7e'),
-	 ('ToZip', u'94571'),
-	 ('Body', u'5 points to gryffindor'),
-	 ('SmsSid', u'SM7d046bca6423d27801e50f1a323152a6'),
-	 ('MessageSid', u'SM7d046bca6423d27801e50f1a323152a6'),
-	 ('FromState', u'CA'),
-	 ('ApiVersion', u'2010-04-01'),
-	 ('FromCountry', u'US')]
-	"""
-	# Print the payload from the client
-	app.logger.info(request.form)
-	professor_name = get_professor_name_from_phone_number(request.form['From'])
-	body = request.form['Body']
-
-
-	point_value_change = sms_parser.parse_point_value_change(body)
-
-
-	custom_reply = ''
-	if is_valid_point_value_change(point_value_change):
-		was_cheating_attempt = False
-		if professor_name == '+15107039410':
-			point_value_change['house'] = 'slytherin'
-			point_value_change['points'] = '1'
-			was_cheating_attempt = True
-
-		store_point_value_change(body, professor_name, point_value_change)
-
-		points = point_value_change['points']
-		house = point_value_change['house']
-
-		if was_cheating_attempt:
-			custom_reply = 'Message managed! Nice try, Isy! 1 point for Slytherin!'
-		else:
-			custom_reply = 'Message managed! {} points for {}!'.format(points, house)
-		app.logger.info(custom_reply)
-
-	else:
-		custom_reply = 'Unable to parse {}'.format(body)
-		app.logger.warning(custom_reply)
-
-	twiml_response = (
-		'<?xml version="1.0" encoding="UTF-8"?>'
-		'<Response>'
-		'<Message>{}</Message>'
-		'</Response>'
-	).format(custom_reply)
-
-	return twiml_response
-
-
 if __name__ == '__main__':
 	app.debug = True
 	port = int(os.environ.get('PORT', 5000))
 	app.run(host='0.0.0.0', port=port)
+

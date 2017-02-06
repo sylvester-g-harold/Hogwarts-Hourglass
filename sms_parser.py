@@ -3,11 +3,7 @@ import re
 def parse_point_value_change(str):
 	house = get_house(str)
 	points = get_points(str)
-	result = {
-		'house': house,
-		'points': points
-	}
-	return result
+	return house, points
 
 def get_polarity(str):
 	polarity = 1

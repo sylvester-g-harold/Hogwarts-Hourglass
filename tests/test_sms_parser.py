@@ -7,10 +7,7 @@ class SmsParserTestCase(unittest.TestCase):
     def test_parse_point_value_change(self):
         input = '5 points for gryffindor!'
         output = sms_parser.parse_point_value_change(input)
-        expected = {
-            'house': 'gryffindor',
-            'points': 5
-        }
+        expected = ('gryffindor', 5)
         self.assertEqual(output, expected)
 
     def test_get_positive_single_digit_points(self):

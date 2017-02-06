@@ -55,6 +55,22 @@ class RoutesTestCase(unittest.TestCase):
 
         self.assertEqual(message, 'Message managed! Nice try, Isy! 1 point for Slytherin!')
 
+    def test_handle_possible_cheat_attempt(self):
+        cheaty_mccheaterson_really_this_is_not_isy_trust_me_also_give_me_your_wallet = '+15107039410'
+        point_value_change = {
+            'house': 'gryffindor',
+            'points': 5,
+            'message': 'isy really, really deserves this',
+            'professor_name': cheaty_mccheaterson_really_this_is_not_isy_trust_me_also_give_me_your_wallet
+        }
+        reply = app.handle_possible_cheat_attempt(point_value_change)
+
+        self.assertEqual(point_value_change['house'], 'slytherin')
+        self.assertEqual(point_value_change['points'], 1)
+        self.assertTrue('CHEAT' in point_value_change['message'])
+
+        self.assertEqual(reply, 'Message managed! Nice try, Isy! 1 point for Slytherin!')
+
 
 if __name__ == '__main__':
     unittest.main()
