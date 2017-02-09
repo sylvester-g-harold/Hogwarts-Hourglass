@@ -52,7 +52,7 @@ class RoutesTestCase(unittest.TestCase):
         message_element = xmldoc.getElementsByTagName('Message')
         message = message_element[0].childNodes[0].nodeValue
 
-        self.assertEqual(message, 'Message managed! 1 points for slytherin!')
+        self.assertEqual(message, 'Message managed! 1 point for slytherin!')
 
     def test_handle_sms_block_isy_trying_to_award_himself_points(self):
         twilio_request =\
