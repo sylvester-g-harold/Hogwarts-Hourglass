@@ -19,9 +19,9 @@ def get_polarity(str):
 def get_points(str):
 	polarity = get_polarity(str)
 
-	matches = re.search('\d+', str)
+	matches = re.search('(\d+)\s*points?\s+(to|from|for)', str)
 	if matches:
-		return int(matches.group(0)) * polarity
+		return int(matches.groups()[0]) * polarity
 	else:
 		return None
 

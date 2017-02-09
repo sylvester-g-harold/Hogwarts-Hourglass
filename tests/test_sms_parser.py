@@ -25,6 +25,16 @@ class SmsParserTestCase(unittest.TestCase):
         output = sms_parser.get_points(input)
         self.assertEqual(output, 1)
 
+    def test_two_mentions_of_points(self):
+        input = '1 point to slytherin for fixing the 2 points bug'
+        output = sms_parser.get_points(input)
+        self.assertEqual(output, 1)        
+
+    def test_two_mentions_of_points_in_inverted_order(self):
+        input = 'for fixing the 2 points bug, 1 point to slytherin '
+        output = sms_parser.get_points(input)
+        self.assertEqual(output, 1)        
+
     def test_get_negative_double_digit_points(self):
         input = '10 points from gryffindor!'
         output = sms_parser.get_points(input)
