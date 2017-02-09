@@ -20,10 +20,10 @@ class SmsParserTestCase(unittest.TestCase):
         output = sms_parser.get_points(input)
         self.assertEqual(output, 10)
 
-    def test_get_negative_single_digit_points(self):
-        input = '5 points from gryffindor!'
+    def test_extra_from_does_not_go_negative(self):
+        input = '1 point to slytherin for electioneering trying to get double points from will for dishwashing'
         output = sms_parser.get_points(input)
-        self.assertEqual(output, -5)
+        self.assertEqual(output, 1)
 
     def test_get_negative_double_digit_points(self):
         input = '10 points from gryffindor!'

@@ -6,10 +6,15 @@ def parse_point_value_change(str):
 	return house, points
 
 def get_polarity(str):
-	polarity = 1
-	if 'from' in str:
-		polarity = -1
-	return polarity
+	matches = re.search('(to|for)\s+(slytherin|hufflepuff|ravenclaw|gryffindor)', str)
+	if matches:
+		return 1
+
+	matches = re.search('from\s+(slytherin|hufflepuff|ravenclaw|gryffindor)', str)
+	if matches:
+		return -1
+
+	return None
 
 def get_points(str):
 	polarity = get_polarity(str)

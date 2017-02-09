@@ -41,9 +41,22 @@ class RoutesTestCase(unittest.TestCase):
 
         self.assertEqual(message, 'Message managed! 5 points for gryffindor!')
 
+    def test_handle_sms_1_points_for_slytherin(self):
+        twilio_request =\
+            {'Body': u'1 point to slytherin for electioneering trying to get double points from will for dishwashing',
+             'From': u'+16502184081'}
+
+        response = self.app.post('/sms', data=twilio_request)
+
+        xmldoc = minidom.parseString(response.data)
+        message_element = xmldoc.getElementsByTagName('Message')
+        message = message_element[0].childNodes[0].nodeValue
+
+        self.assertEqual(message, 'Message managed! 1 points for slytherin!')
+
     def test_handle_sms_block_isy_trying_to_award_himself_points(self):
         twilio_request =\
-            {'Body': u'5 points to gryffindor',
+            {'Body': u'1 points to slytherin!',
              'From': u'+15107039410',
              'To': u'+15107571733'}
 
