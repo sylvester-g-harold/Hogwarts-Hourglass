@@ -71,10 +71,9 @@ def store_point_value_change(point_value_change):
 
     statement = ('insert into hourglass_points '
                  '(house, points, professor_name, message)'
-                 'values (\'{}\', {}, \'{}\', \'{}\');'
-                ).format(house, points, professor_name, message)
-
-    cursor.execute(statement)
+                 'values (%s, %s, %s, %s);'
+                )
+    cursor.execute(statement, (house, points, professor_name, message))
     db.commit()
 
     app.logger.info('Inserted values into db: {}, {}, {}, {}'
