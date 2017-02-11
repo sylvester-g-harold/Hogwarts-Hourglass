@@ -17,6 +17,7 @@ def get_polarity(str):
 	return None
 
 def get_points(str):
+	str = str.lower()
 	polarity = get_polarity(str)
 
 	matches = re.search('(\d+)\s*points?\s+(to|from|for)', str)
@@ -29,12 +30,12 @@ def get_house(str):
 	str = str.lower()
 
 	if 'gryffindor' in str:
-		return 'gryffindor'
+		return 'Gryffindor'
 	if 'hufflepuff' in str:
-		return 'hufflepuff'
+		return 'Hufflepuff'
 	if 'ravenclaw' in str:
-		return 'ravenclaw'
+		return 'Ravenclaw'
 	if 'slytherin' in str:
-		return 'slytherin'
+		return 'Slytherin'
 
 	return None

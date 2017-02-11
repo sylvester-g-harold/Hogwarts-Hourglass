@@ -39,11 +39,11 @@ class RoutesTestCase(unittest.TestCase):
         message_element = xmldoc.getElementsByTagName('Message')
         message = message_element[0].childNodes[0].nodeValue
 
-        self.assertEqual(message, 'Message managed! 5 points for gryffindor!')
+        self.assertEqual(message, 'Message managed! 5 points for Gryffindor!')
 
-    def test_handle_sms_1_points_for_slytherin(self):
+    def test_handle_sms_parse_the_for_from_case(self):
         twilio_request =\
-            {'Body': u'1 point to slytherin for electioneering trying to get double points from will for dishwashing',
+            {'Body': u'1 point to Slytherin for electioneering trying to get double points from will for dishwashing',
              'From': u'+16502184081'}
 
         response = self.app.post('/sms', data=twilio_request)
@@ -52,14 +52,28 @@ class RoutesTestCase(unittest.TestCase):
         message_element = xmldoc.getElementsByTagName('Message')
         message = message_element[0].childNodes[0].nodeValue
 
-        self.assertEqual(message, 'Message managed! 1 point for slytherin!')
+        self.assertEqual(message, 'Message managed! 1 point for Slytherin!')
+
+    def test_handle_sms_allows_non_isy_award_slytherin_point(self):
+        twilio_request =\
+            {'Body': u'1 point to slytherin!',
+             'From': u'+16502184081',
+             'To': u'+15107571733'}
+        pass
+        response = self.app.post('/sms', data=twilio_request)
+
+        xmldoc = minidom.parseString(response.data)
+        message_element = xmldoc.getElementsByTagName('Message')
+        message = message_element[0].childNodes[0].nodeValue
+
+        self.assertEqual(message, 'Message managed! 1 point for Slytherin!')
 
     def test_handle_sms_block_isy_trying_to_award_himself_points(self):
         twilio_request =\
-            {'Body': u'1 points to slytherin!',
+            {'Body': u'1 points from slytherin!',
              'From': u'+15107039410',
              'To': u'+15107571733'}
-
+        pass
         response = self.app.post('/sms', data=twilio_request)
 
         xmldoc = minidom.parseString(response.data)
@@ -67,6 +81,7 @@ class RoutesTestCase(unittest.TestCase):
         message = message_element[0].childNodes[0].nodeValue
 
         self.assertEqual(message, 'Message managed! Nice try, Isy! 1 point for Slytherin!')
+
 
     def test_handle_possible_cheat_attempt(self):
         cheaty_mccheaterson_really_this_is_not_isy_trust_me_also_give_me_your_wallet = '+15107039410'
